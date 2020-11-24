@@ -29,6 +29,8 @@ const chartData = {
 };
 
 class Ranking extends Component {
+  interval = null;
+
   constructor(props) {
     super(props);
     this.chartReference = React.createRef();
@@ -38,29 +40,23 @@ class Ranking extends Component {
     };
   }
 
-  componentDidMount() {
-    let that = this;
-    // this.chartReference.data.datasets[0].data = this.state.values.map(
-    //   (d) => d.value
-    // );
+  componentDidMount = () => {
+    this.interval = setInterval(this.getData, 30000);
+    this.getData();
+  };
 
-    axios
-      .get(`${PROXY_URL}https://dashfeed.nextcanvas.com/api/Widgets/Matrix/305011`)
-      .then((res) => {
-        console.log(res);
-        const values = res.data;
-        
-        // let lineChart = this.reference.chartInstance
-        // lineChart.update();
-        // that.chartReference.current.props.data.datasets[0].data = values;
-        // debugger
-        // that.chartReference.current.update();
-
-        let newData = Object.assign({}, chartData)
-        newData.datasets[0].data = values;
-        this.setState({ data: newData });
-      });
+  componentWillUnmount() {
+    clearInterval(this.interval);
   }
+
+  getData = () => {
+    const url = `${PROXY_URL}https://dashfeed.nextcanvas.com/api/Widgets/Matrix/305011`;
+    axios.get(url).then((res) => {
+      let newData = Object.assign({}, chartData);
+      newData.datasets[0].data = res.data;
+      this.setState({ data: newData });
+    });
+  };
 
   render() {
     return (
